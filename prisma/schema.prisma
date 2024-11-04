@@ -1,0 +1,54 @@
+// Prisma schema for User and Task tables in a To-Do app
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  avatar    String?
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tasks Task[]
+}
+
+model Task {
+  taskId      Int       @id @default(autoincrement()) @map("task_id")
+  userId      Int       @map("user_id")
+  task        String
+  description String?
+  status      Status    @default(PENDING)
+  dueDate     DateTime? @map("due_date")
+  priority    Priority  @default(MEDIUM)
+  category    String?
+  reminderAt  DateTime? @map("reminder_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId], name: "idx_user_id")
+}
+
+enum Status {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  DELETED
+}
+
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
